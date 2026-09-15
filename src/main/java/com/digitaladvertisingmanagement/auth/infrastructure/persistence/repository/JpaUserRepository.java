@@ -31,6 +31,11 @@ class JpaUserRepository implements UserRepository {
     return repository.findByEmail(email).map(JpaUserRepository::toDomain);
   }
 
+  @Override
+  public Optional<User> findById(Long id) {
+    return repository.findById(id).map(JpaUserRepository::toDomain);
+  }
+
   private static UserJpaEntity toJpa(User user) {
     return new UserJpaEntity(
         user.getId(), user.getEmail(), user.getPasswordHash(), user.getStatus());

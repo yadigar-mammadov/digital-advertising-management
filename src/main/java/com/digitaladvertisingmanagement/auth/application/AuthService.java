@@ -51,7 +51,7 @@ public class AuthService {
   private User authenticate(String email, String rawPassword) {
     User user = userRepository.findByEmail(email).orElseThrow(this::invalidCredentials);
 
-    if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
+    if (!passwordEncoder.matches(rawPassword, user.getPasswordHash()) || !user.isActive()) {
       throw invalidCredentials();
     }
 

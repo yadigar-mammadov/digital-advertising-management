@@ -30,6 +30,10 @@ public class User {
     return status;
   }
 
+  public boolean isActive() {
+    return status == UserStatus.ACTIVE;
+  }
+
   public static User create(String email, String passwordHash) {
     if (email == null || email.isBlank()) {
       throw new IllegalArgumentException("Email is required.");

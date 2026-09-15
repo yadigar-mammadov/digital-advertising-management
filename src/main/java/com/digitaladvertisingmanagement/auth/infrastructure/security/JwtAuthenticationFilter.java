@@ -1,6 +1,8 @@
 package com.digitaladvertisingmanagement.auth.infrastructure.security;
 
 import com.digitaladvertisingmanagement.auth.application.security.AuthenticatedUser;
+import com.digitaladvertisingmanagement.auth.domain.model.User;
+import com.digitaladvertisingmanagement.auth.domain.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +19,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
+  private final UserRepository userRepository;
 
-  public JwtAuthenticationFilter(JwtService jwtService) {
+  public JwtAuthenticationFilter(JwtService jwtService, UserRepository userRepository) {
     this.jwtService = jwtService;
+    this.userRepository = userRepository;
   }
 
   @Override
@@ -34,10 +38,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (token != null && jwtService.isValid(token)) {
       AuthenticatedUser principal = jwtService.extractAuthenticatedUser(token);
 
-      UsernamePasswordAuthenticationToken authentication =
-          new UsernamePasswordAuthenticationToken(principal, null, List.of());
+      User user = userRepository.findById(principal.id()).orElse(null);
 
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+      if (user != null && user.isActive()) {
+        UsernamePasswordAuthenticationToken authentication =
+            new UsernamePasswordAuthenticationToken(principal, null, List.of());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+      }
     }
 
     filterChain.doFilter(request, response);
